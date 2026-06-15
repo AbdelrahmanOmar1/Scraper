@@ -1,0 +1,23 @@
+{
+  "name": "findlybackend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "author": "abdelrahman",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongodb": "^7.3.0",
+    "mongoose": "^9.7.0",
+    "nodemon": "^3.1.14",
+    "playwright": "^1.60.0",
+    "proxy-agent": "^8.0.2"
+  }
+}
