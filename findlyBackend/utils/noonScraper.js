@@ -26,15 +26,18 @@ async function scrapeNoon(query, minPrice, maxPrice) {
   return await withRetry(async () => {
     console.log(chalk.cyan("Start Scrape from Noon..."));
 
-    const browser = await chromium.launch({
-      headless: false, // 
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-blink-features=AutomationControlled",
-      ],
-    });
+ const browser = await chromium.launch({
+  headless: true,  
+  args: [
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--disable-dev-shm-usage",
+    "--disable-gpu",
+    "--window-size=1280,800",
+    "--disable-http2",
+    "--disable-quic",
+  ],
+})
 
     const context = await browser.newContext({
       viewport: { width: 1280, height: 800 },
