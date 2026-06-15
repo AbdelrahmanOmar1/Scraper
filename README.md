@@ -28,8 +28,8 @@
 findlyBackend/
 │
 ├── server.js                   # App entry point
-├── config/
-│   └── db.js                   # MongoDB connection
+├── app.js
+│   
 │
 ├── models/
 │   └── dataModel.js            # Product schema
@@ -82,6 +82,12 @@ Create a `.env` file in the root directory:
 ```env
 PORT=8000
 MONGO_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/findly
+```
+
+```bash
+
+cd findlyUi/findly
+npm install
 ```
 
 ---
@@ -214,19 +220,7 @@ async function withRetry(fn, retries = 2)
 - MongoDB caching avoids duplicate scraping for repeated queries
 - DOM parsing optimized for minimal evaluation overhead
 
----
 
-## 🧩 Roadmap
-
-- [ ] Redis caching layer
-- [ ] Proxy rotation system
-- [ ] CAPTCHA solver integration
-- [ ] Queue system (BullMQ)
-- [ ] Real-time scraping dashboard
-- [ ] GraphQL API layer
-- [ ] Docker deployment
-
----
 
 ## 🧪 Example Flow
 
