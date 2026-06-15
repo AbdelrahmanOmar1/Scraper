@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API = import.meta.env.VITE_API_URL;
+const API = "https://scraper-production-4be3.up.railway.app";
 export function useProducts(query, min, max, sort) {
   const [allProducts, setAllProducts] = useState([]);
   const [products, setProducts] = useState([]);
