@@ -24,7 +24,7 @@ async function scrapeAmazon(query) {
     console.log(chalk.cyan("Start Scrape from AMAZON..."));
 
     const browser = await chromium.launch({
-      headless: true,
+      headless: false,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
