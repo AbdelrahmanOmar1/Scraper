@@ -3,28 +3,24 @@ const mongoose = require("mongoose");
 const chalk = require("chalk");
 const app = require("./app");
 
-// uncaughtException
 process.on("uncaughtException", (err) => {
   console.log("UNCAUGHT EXCEPTION! 💥 Shutting down...");
   console.log(err.name, err.message);
   process.exit(1);
 });
 
-// Connect DB
 mongoose
-  .connect(process.env.MONGO_URI) // ✅ fixed typo: monogDB → MONGO_URI
-  .then(() => console.log(chalk.yellow("Connected to DB Successfully...."))) /
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log(chalk.yellow("Connected to DB Successfully....")))
   .catch((err) => {
     console.log(chalk.red("DB Connection Failed!⛔", err));
   });
 
-// Running Server
 const PORT = process.env.PORT || 8000;
 const server = app.listen(PORT, () => {
   console.log(chalk.blue(`Server is running on port ${PORT}...`));
 });
 
-// unhandledRejection
 process.on("unhandledRejection", (err) => {
   console.log("UNHANDLED REJECTION! 💥 Shutting down...");
   console.log(err.name, err.message);
@@ -33,7 +29,6 @@ process.on("unhandledRejection", (err) => {
   });
 });
 
-// SIGTERM
 process.on("SIGTERM", () => {
   console.log("👋 SIGTERM RECEIVED. Shutting down gracefully");
   server.close(() => {
