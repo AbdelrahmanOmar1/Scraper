@@ -1,3 +1,4 @@
+require("dotenv").config(); 
 const mongoose = require("mongoose");
 const chalk = require("chalk");
 const app = require("./app");
