@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+const API = import.meta.env.VITE_API_URL;
 export function useProducts(query, min, max, sort) {
   const [allProducts, setAllProducts] = useState([]);
   const [products, setProducts] = useState([]);
@@ -13,12 +14,10 @@ export function useProducts(query, min, max, sort) {
 
     try {
       await fetch(
-        `http://localhost:8000/api/v1/findly?q=${query}&source=amazon,noon&min=${min}&max=${max}`,
+        `${API}/api/v1/findly?q=${query}&source=amazon,noon&min=${min}&max=${max}`,
       );
 
-      const res = await fetch(
-        `http://localhost:8000/api/v1/products?q=${query}`,
-      );
+    const res = await fetch(`${API}/api/v1/products?q=${query}`);
 
       const data = await res.json();
 
