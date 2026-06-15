@@ -23,7 +23,7 @@ async function scrapeNoon(query, minPrice, maxPrice) {
     console.log(chalk.cyan("Start Scrape from Noon..."));
 
     const browser = await chromium.launch({
-      headless: false,
+      headless: true,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
