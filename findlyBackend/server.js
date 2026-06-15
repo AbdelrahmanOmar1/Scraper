@@ -1,4 +1,4 @@
-require("dotenv").config(); 
+require("dotenv").config();
 const mongoose = require("mongoose");
 const chalk = require("chalk");
 const app = require("./app");
@@ -10,21 +10,21 @@ process.on("uncaughtException", (err) => {
   process.exit(1);
 });
 
-//Connect DB
+// Connect DB
 mongoose
-  .connect(process.env.monogDB)
-  .then(console.log(chalk.yellow("Connected to DB Successfully....")))
+  .connect(process.env.MONGO_URI) // ✅ fixed typo: monogDB → MONGO_URI
+  .then(() => console.log(chalk.yellow("Connected to DB Successfully...."))) /
   .catch((err) => {
-    console.log(chalk.red("DB Connection Faild!⛔", err));
+    console.log(chalk.red("DB Connection Failed!⛔", err));
   });
 
-// Ruuning Server
+// Running Server
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(chalk.blue(`Server is running on port ${PORT}...`));
 });
 
-//unhandledRejection
+// unhandledRejection
 process.on("unhandledRejection", (err) => {
   console.log("UNHANDLED REJECTION! 💥 Shutting down...");
   console.log(err.name, err.message);
@@ -33,7 +33,7 @@ process.on("unhandledRejection", (err) => {
   });
 });
 
-//SIGTERM
+// SIGTERM
 process.on("SIGTERM", () => {
   console.log("👋 SIGTERM RECEIVED. Shutting down gracefully");
   server.close(() => {
