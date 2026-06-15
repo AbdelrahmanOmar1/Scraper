@@ -19,6 +19,14 @@ app.use(morgan("dev"));
 app.use("/api/v1", scraperRoutes);
 app.use("/api/v1", productRoutes);
 
+
+app.use((err, req, res, next) => {
+  console.error("🔥 ERROR:", err);
+  res.status(500).json({
+    message: err.message,
+    stack: err.stack,
+  });
+});
 //Unhandled Routes
 app.use((req, res) => {
   res.status(404).json({
