@@ -48,16 +48,13 @@ async function scrapeAlibaba(query) {
       query,
     )}`;
 
-    // 🔥 FIX: no networkidle
     await page.goto(url, {
       waitUntil: "domcontentloaded",
       timeout: 60000,
     });
 
-    // 🔥 Allow JS rendering
     await page.waitForTimeout(5000);
 
-    // 🔥 Better selector (IMPORTANT)
     await page.waitForSelector(".organic-offer-wrapper", {
       timeout: 20000,
     });
@@ -93,9 +90,7 @@ async function scrapeAlibaba(query) {
               source: "alibaba",
             });
           }
-        } catch (e) {
-          // skip broken card
-        }
+        } catch (e) {}
       });
 
       return items.slice(0, 30);

@@ -28,6 +28,7 @@ async function scrapeNoon(query, minPrice, maxPrice) {
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-blink-features=AutomationControlled",
+        "--disable-dev-shm-usage",
       ],
     });
 
@@ -84,7 +85,10 @@ async function scrapeNoon(query, minPrice, maxPrice) {
 
           const link = card.querySelector("a")?.href || null;
 
-          const image = card.querySelector("img")?.src || null;
+          const image =
+            card.querySelector(
+              ".ProductImageCarousel-module-scss-module__SlkSTG__productImage",
+            )?.src || null;
 
           if (title && link) {
             items.push({

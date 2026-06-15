@@ -1,4 +1,6 @@
 const express = require("express");
+const morgan = require("morgan");
+const cors = require("cors");
 const app = express();
 const scraperRoutes = require("./routes/scaraperRoutes");
 const productRoutes = require("./routes/productRoutes");
@@ -6,6 +8,13 @@ require("dotenv").config();
 
 // Middleware
 app.use(express.json());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
+app.use(morgan("dev"));
 
 // Rourtes
 app.use("/api/v1", scraperRoutes);

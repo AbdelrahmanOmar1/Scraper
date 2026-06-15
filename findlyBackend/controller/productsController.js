@@ -20,9 +20,6 @@ exports.getProducts = async (req, res) => {
 
     let results = await Product.find(filter);
 
-    // =========================
-    // PRICE FILTER
-    // =========================
     const minPrice = min ? Number(min) : null;
     const maxPrice = max ? Number(max) : null;
 
@@ -38,9 +35,6 @@ exports.getProducts = async (req, res) => {
       });
     }
 
-    // =========================
-    // SORTING
-    // =========================
     const getPrice = (p) =>
       Number((p.price || "").toString().replace(/[^\d]/g, "")) || 0;
 
