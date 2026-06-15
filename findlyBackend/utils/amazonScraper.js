@@ -29,6 +29,7 @@ async function scrapeAmazon(query) {
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage",
         "--disable-blink-features=AutomationControlled",
+        "--disable-gpu",
       ],
     });
 
@@ -41,15 +42,46 @@ async function scrapeAmazon(query) {
       userAgent:
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
         "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-    }); // ✅ closing }); was missing
+      extraHTTPHeaders: {
+        "accept-language": "en-US,en;q=0.9",
+        // ✅ Tell Amazon we want the Egyptian store in English
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+      },
+    });
+
+    // ✅ Set cookies to force Amazon Egypt + English language
+    await context.addCookies([
+      {
+        name: "i18n-prefs",
+        value: "EGP",
+        domain: ".amazon.eg",
+        path: "/",
+      },
+      {
+        name: "lc-acbeg",
+        value: "en_US",
+        domain: ".amazon.eg",
+        path: "/",
+      },
+      {
+        name: "sp-cdn",
+        value: "L5Z9:EG",
+        domain: ".amazon.eg",
+        path: "/",
+      },
+    ]);
+
+    await context.addInitScript(() => {
+      Object.defineProperty(navigator, "webdriver", { get: () => undefined });
+      window.chrome = { runtime: {} };
+    });
 
     const page = await context.newPage();
 
-    await page.setExtraHTTPHeaders({
-      "accept-language": "en-US,en;q=0.9",
-    });
-
-    const url = `https://www.amazon.eg/s?k=${encodeURIComponent(query)}`;
+    const url = `https://www.amazon.eg/s?k=${encodeURIComponent(query)}&language=en_US`;
 
     try {
       await page.goto(url, {
@@ -57,11 +89,28 @@ async function scrapeAmazon(query) {
         timeout: 30000,
       });
     } catch (err) {
+      console.log(chalk.yellow("Amazon navigation failed:", err.message));
       await browser.close();
       return [];
     }
 
-    console.log("page title:", await page.title());
+    const title = await page.title();
+    console.log("page title:", title);
+
+    // ✅ If still getting Arabic sorry page, try with language param
+    if (title.includes("عذرًا") || title.includes("Sorry")) {
+      console.log(chalk.yellow("⚠️ Got blocked page, retrying with different URL..."));
+      try {
+        await page.goto(
+          `https://www.amazon.eg/s?k=${encodeURIComponent(query)}&ref=nb_sb_noss&language=en_US`,
+          { waitUntil: "domcontentloaded", timeout: 30000 }
+        );
+        console.log("page title (retry):", await page.title());
+      } catch (e) {
+        await browser.close();
+        return [];
+      }
+    }
 
     const html = await page.content();
     if (html.includes("captcha")) {
@@ -107,9 +156,7 @@ async function scrapeAmazon(query) {
 
     await browser.close();
 
-    console.log(
-      chalk.green(`Amazon scraped ${products.length} products successfully`)
-    );
+    console.log(chalk.green(`Amazon scraped ${products.length} products successfully`));
     console.log(chalk.cyan("End Scrape from AMAZON..."));
 
     return products;
