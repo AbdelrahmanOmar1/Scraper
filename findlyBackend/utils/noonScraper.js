@@ -8,11 +8,15 @@ function parsePrice(priceText) {
   return cleaned ? Number(cleaned) : null;
 }
 
-async function withRetry(fn, retries = 2) {
+// SAFE retry (never crash API)
+async function withRetry(fn, retries = 1) {
   try {
     return await fn();
   } catch (err) {
-    if (retries === 0) throw err;
+    console.log(chalk.yellow(`Noon failed: ${err.message}`));
+
+    if (retries <= 0) return [];
+
     console.log(chalk.yellow(`Retrying Noon... (${retries})`));
     return await withRetry(fn, retries - 1);
   }
@@ -23,12 +27,12 @@ async function scrapeNoon(query, minPrice, maxPrice) {
     console.log(chalk.cyan("Start Scrape from Noon..."));
 
     const browser = await chromium.launch({
-      headless: false,
+      headless: true, // ✅ FIXED FOR PRODUCTION
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
-        "--disable-blink-features=AutomationControlled",
         "--disable-dev-shm-usage",
+        "--disable-blink-features=AutomationControlled",
       ],
     });
 
@@ -36,7 +40,7 @@ async function scrapeNoon(query, minPrice, maxPrice) {
       viewport: { width: 1280, height: 800 },
       userAgent:
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
-        "(KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
+        "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     });
 
     const page = await context.newPage();
@@ -46,51 +50,61 @@ async function scrapeNoon(query, minPrice, maxPrice) {
     });
 
     const url = `https://www.noon.com/egypt-en/search/?q=${encodeURIComponent(
-      query,
+      query
     )}`;
 
-    await page.goto(url, {
-      waitUntil: "domcontentloaded",
-      timeout: 60000,
-    });
+    // SAFE NAVIGATION
+    try {
+      await page.goto(url, {
+        waitUntil: "domcontentloaded",
+        timeout: 30000,
+      });
+    } catch (err) {
+      await browser.close();
+      return [];
+    }
 
-    await page.waitForTimeout(4000);
+    await page.waitForTimeout(3000);
 
-    await page.waitForSelector(
-      ".PBoxLinkHandler-module-scss-module__WvRpgq__linkWrapper",
-      { timeout: 20000 },
-    );
+    // ⚠️ DO NOT hard fail if selector changes
+    let cardsExist = true;
+    try {
+      cardsExist = await page
+        .locator("div")
+        .first()
+        .isVisible({ timeout: 5000 });
+    } catch {
+      cardsExist = false;
+    }
+
+    if (!cardsExist) {
+      await browser.close();
+      return [];
+    }
 
     const products = await page.evaluate(() => {
       const items = [];
 
-      const cards = document.querySelectorAll(
-        ".PBoxLinkHandler-module-scss-module__WvRpgq__linkWrapper",
-      );
+      const cards = document.querySelectorAll("a[href*='/product/']");
 
       cards.forEach((card) => {
         try {
           const title =
-            card.querySelector(
-              ".ProductDetailsSection-module-scss-module__Y6u1Qq__title",
-            )?.innerText ||
             card.querySelector("h2")?.innerText ||
+            card.querySelector("span")?.innerText ||
             null;
 
           const price =
-            card.querySelector(".Price-module-scss-module__q-4KEG__amount")
-              ?.innerText ||
-            card.innerText.match(/\d[\d,]*/)?.[0] ||
-            null;
+            card.innerText.match(/\d[\d,]*\s*EGP|\d[\d,]*/)?.[0] || null;
 
-          const link = card.querySelector("a")?.href || null;
+          const link = card.href || null;
 
           const image =
-            card.querySelector(
-              ".ProductImageCarousel-module-scss-module__SlkSTG__productImage",
-            )?.src || null;
+            card.querySelector("img")?.src ||
+            card.querySelector("img")?.getAttribute("data-src") ||
+            null;
 
-          if (title && link) {
+          if (title && link && title.length > 3) {
             items.push({
               title,
               price,
@@ -102,7 +116,7 @@ async function scrapeNoon(query, minPrice, maxPrice) {
         } catch (e) {}
       });
 
-      return items;
+      return items.slice(0, 40);
     });
 
     await browser.close();
@@ -119,10 +133,8 @@ async function scrapeNoon(query, minPrice, maxPrice) {
     });
 
     console.log(
-      chalk.green(`Noon scraped ${filtered.length} products successfully`),
+      chalk.green(`Noon scraped ${filtered.length} products successfully`)
     );
-
-    console.log(chalk.cyan("End Scrape from Noon..."));
 
     return filtered;
   });
