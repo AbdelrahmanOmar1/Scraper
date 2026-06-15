@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "postinstall": "npx playwright install --with-deps"
   },
   "author": "abdelrahman",
   "license": "ISC",
@@ -21,7 +22,6 @@
     "morgan": "^1.11.0",
     "nodemon": "^3.1.14",
     "playwright": "^1.60.0",
-    "proxy-agent": "^8.0.2",
-    "postinstall": "npx playwright install --with-deps"
+    "proxy-agent": "^8.0.2"
   }
 }
