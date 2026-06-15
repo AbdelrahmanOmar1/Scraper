@@ -1,9 +1,10 @@
 import { useState } from "react";
 
-import SearchBar from "../components/layout/SearchBar";
-import PriceFilter from "../components/layout/PriceFilter";
-import SortBar from "../components/layout/SortBar";
-import ProductCard from "../components/layout/ProductCard";
+import SearchBar from "../Components/layout/SearchBar";
+import PriceFilter from "../Components/layout/PriceFilter";
+import SortBar from "../Components/layout/SortBar";
+import ProductCard from "../Components/layout/ProductCard";
+
 
 import { useProducts } from "../hooks/useProducts";
 
