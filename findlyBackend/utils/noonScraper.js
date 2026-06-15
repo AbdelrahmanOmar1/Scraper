@@ -21,17 +21,19 @@ async function withRetry(fn, retries = 1) {
 function buildNoonImage(p) {
   // Option 1: image_keys array (most common)
   if (p?.image_keys?.length > 0) {
-    return `https://f.nooncdn.com/p/${p.image_keys[0]}z.jpg`;
+    return `https://f.nooncdn.com/p/${p.image_keys[0]}.jpg`; // ✅ no z suffix
   }
   // Option 2: image_key string
   if (p?.image_key) {
-    return `https://f.nooncdn.com/p/${p.image_key}z.jpg`;
+    return `https://f.nooncdn.com/p/${p.image_key}.jpg`; // ✅ no z suffix
   }
-  // Option 3: thumbnail direct URL
+  // Option 3: image_url direct from API
+  if (p?.image_url) return p.image_url;
+  // Option 4: thumbnail direct URL
   if (p?.thumbnail) return p.thumbnail;
-  // Option 4: image direct URL
+  // Option 5: image direct URL
   if (p?.image) return p.image;
-  // Option 5: media array
+  // Option 6: media array
   if (p?.media?.length > 0) return p.media[0];
 
   return null;
@@ -90,7 +92,6 @@ async function scrapeNoon(query, minPrice, maxPrice) {
           [];
 
         if (hits.length > 0) {
-          // ✅ Log first item's raw structure so we can see all available fields
           console.log(
             chalk.gray("→ First hit sample keys:"),
             Object.keys(hits[0]?.product || hits[0] || {})
@@ -109,10 +110,8 @@ async function scrapeNoon(query, minPrice, maxPrice) {
     const products = hits
       .map((item) => {
         const p = item?.product || item;
-
         const image = buildNoonImage(p);
 
-        // ✅ log first product image to verify
         if (hits.indexOf(item) === 0) {
           console.log(chalk.gray("→ Sample image_keys:"), p?.image_keys);
           console.log(chalk.gray("→ Built image URL:"), image);
