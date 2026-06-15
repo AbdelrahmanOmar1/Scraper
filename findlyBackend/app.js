@@ -1,33 +1,25 @@
+require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
 const app = express();
 const scraperRoutes = require("./routes/scaraperRoutes");
 const productRoutes = require("./routes/productRoutes");
-require("dotenv").config();
 
 // Middleware
 app.use(express.json());
 app.use(
   cors({
-    origin: "*", 
+    origin: "*",
   })
 );
 app.use(morgan("dev"));
 
-// Rourtes
+// Routes
 app.use("/api/v1", scraperRoutes);
 app.use("/api/v1", productRoutes);
 
-
-app.use((err, req, res, next) => {
-  console.error("🔥 ERROR:", err);
-  res.status(500).json({
-    message: err.message,
-    stack: err.stack,
-  });
-});
-//Unhandled Routes
+// Unhandled Routes
 app.use((req, res) => {
   res.status(404).json({
     status: "fail",
@@ -35,12 +27,12 @@ app.use((req, res) => {
   });
 });
 
-// Global Error Handling Middleware
+
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
+  console.error("🔥 ERROR:", err);
+  res.status(err.status || 500).json({
     status: "error",
-    message: "Something went wrong!",
+    message: err.message || "Something went wrong!",
   });
 });
 
